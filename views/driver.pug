@@ -1,0 +1,34 @@
+extends ../node_modules/jade-bootstrap/_bootstrap.pug
+append body
+  link(rel='stylesheet', href='/stylesheets/style.css')
+
+  .container
+    h1.text-center Đăng ký thông tin tài xế
+    form(action="/create-driver",method='post')
+      div.form-group 
+        label(for='driver_id') Mã tài xế
+        input.form-control(type='text',id='driver_id',name='driver_id')
+      div.form-group 
+        label(for='ten') Name
+        input.form-control(type='text',id='ten',name='ten')
+      div.form-group 
+        label(for='cmt') CMT
+        input.form-control(type='text',id='cmt',name='cmt')
+      div.form-group 
+        label(for='ma_so_bang_lai') Mã bằng lái
+        input.form-control(type='text',id='ma_so_bang_lai',name='ma_so_bang_lai')
+      div.form-group 
+        label(for='loai_bang_lai') Loại bằng lái
+        input.form-control(type='text',id='loai_bang_lai',name='loai_bang_lai')
+      div.form-group 
+        label(for='dia_chi') Địa chỉ
+        input.form-control(type='text',id='dia_chi',name='dia_chi')
+      div.form-group 
+        label(for='ngay_sinh') Ngày tháng năm sinh
+        input.form-control(type='date',id='ngay_sinh',name='ngay_sinh')
+      div.form-group 
+        label(for='tham_nien') Số năm kinh nghiệm
+        input.form-control(type='text',id='tham_nien',name='tham_nien')
+      div.text-right
+        a.btn.btn-default.w-200px.mr-12px(href="/") Quay lại
+        button.btn.btn-primary.w-200px(type='submit') Gửi

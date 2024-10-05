@@ -1,0 +1,47 @@
+extends ../node_modules/jade-bootstrap/_bootstrap.pug
+append body
+  link(rel='stylesheet', href='/stylesheets/style.css')
+  .container
+    h1.text-center Đăng ký thông tin hành trình
+    form(action="/create-trip",method="post")
+      div.form-group  
+        label(for="trip_id") Mã hành trình
+        input.form-control(type="text",id="trip_id",name="trip_id")
+      div.form-group 
+        label(for="ma_so_chuyen_xe") Mã số chuyến xe
+        input.form-control(type="text",id="ma_so_chuyen_xe",name="ma_so_chuyen_xe")
+      div.form-group 
+        label(for="car_id") Biển số xe
+        select.form-control(id="car_id", name="car_id")
+          each item in cars
+            option(value=item.car_id) #{item.bien_so}
+      div.form-group 
+        label(for="tuyen") Tuyến đường
+        select.form-control(id="tuyen", name="tuyen")
+          each item in routes
+            option(value=item.route_id) #{item.diem_dau} - #{item.diem_cuoi}
+      div.form-group 
+        label(for="ten_lai_xe") Tên lái xe
+        select.form-control(id="ten_lai_xe", name="ten_lai_xe")
+          each item in drivers
+            option(value=item.driver_id) #{item.ten}
+      div.form-group 
+        label(for="ten_phu_xe") Tên phụ xe
+        select.form-control(id="ten_phu_xe", name="ten_phu_xe")
+          each item in drivers
+            option(value=item.driver_id) #{item.ten}
+      div.form-group 
+        label(for="so_khach") Số khách
+        input.form-control(type="number",id="so_khach",name="so_khach")
+      div.form-group 
+        label(for="gia_ve") Giá vé
+        input.form-control(type="number",id="gia_ve",name="gia_ve")
+      div.form-group 
+        label(for="ngay_bat_dau") Ngày bắt đầu
+        input.form-control(type="date",id="ngay_bat_dau",name="ngay_bat_dau")
+      div.form-group 
+        label(for="ngay_ket_thuc") Ngày kết thúc
+        input.form-control(type="date",id="ngay_ket_thuc",name="ngay_ket_thuc")
+      div.text-right
+        a.btn.btn-default.w-200px.mr-12px(href="/") Quay lại
+        button.btn.btn-primary.w-200px(type="submit") Gửi

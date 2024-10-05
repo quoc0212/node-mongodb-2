@@ -1,0 +1,27 @@
+extends ../node_modules/jade-bootstrap/_bootstrap.pug
+append body
+  link(rel='stylesheet', href='/stylesheets/style.css')
+  .container
+    h1.text-center Đăng ký thông tuyến đường
+    form(action="/create-route",method="post")
+      div.form-group 
+        label(for="route_id") Mã tuyến
+        input.form-control(type="text",id="route_id",name="route_id")
+      div.form-group 
+        label(for="diem_dau") Điểm đầu
+        input.form-control(type="text",id="diem_dau",name="diem_dau")
+      div.form-group 
+        label(for="diem_cuoi") Điểm cuối
+        input.form-control(type="text",id="diem_cuoi",name="diem_cuoi")
+      div.form-group 
+        label(for="do_dai") Độ dài
+        input.form-control(type="number",id="do_dai",name="do_dai")
+      div.form-group 
+        label(for="do_phuc_tap") Độ phức tạp
+        input.form-control(type="text",id="do_phuc_tap",name="do_phuc_tap")
+      div.form-group 
+        label(for="duong_kho") Đường khó
+        input.form-control(type="text",id="duong_kho",name="duong_kho")
+      div.text-right
+        a.btn.btn-default.w-200px.mr-12px(href="/") Quay lại
+        button.btn.btn-primary.w-200px(type="submit") Gửi

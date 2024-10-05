@@ -1,0 +1,22 @@
+extends layout
+
+block content
+  h1 Truy vấn dữ liệu
+  form(action="/filter-aggregate",method="post")
+    table 
+      tbody 
+        tr 
+          td 
+            label(for="table") Table:
+          td 
+            select#table(name="table")
+              option(value="trips") trips
+              option(value="drivers") drivers
+              option(value="cars") cars
+              option(value="routes") routes  
+        tr
+          td
+            label(for="query") Query String:
+          td
+            textarea#query(name="query", cols="30", rows="10")
+    button(type="submit") Gửi

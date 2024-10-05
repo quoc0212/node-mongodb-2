@@ -1,0 +1,37 @@
+extends ../node_modules/jade-bootstrap/_bootstrap.pug
+append body
+  link(rel='stylesheet', href='/stylesheets/style.css')
+
+  .container
+    h1.text-center Đăng ký thông tin xe
+    form(action="/create-car",method="post")
+      div.form-group
+        label(for="car_id") Mã Xe
+        input.form-control(type="text",id="car_id",name="car_id")
+      div.form-group
+        label(for="bien_so") Biển số
+        input.form-control(type="text",id="bien_so",name="bien_so")
+      div.form-group
+        label(for="mau_xe") Màu xe
+        input.form-control(type="text",id="mau_xe",name="mau_xe")
+      div.form-group
+        label(for="hang_san_xuat") Hãng sản xuất
+        input.form-control(type="text",id="hang_san_xuat",name="hang_san_xuat")
+      div.form-group
+        label(for="doi_xe") Đời xe
+        input.form-control(type="text",id="doi_xe",name="doi_xe")
+      div.form-group
+        label(for="model") Model
+        input.form-control(type="text",id="model",name="model")
+      div.form-group
+        label(for="so_ghe") Số ghế
+        input.form-control(type="number",id="so_ghe",name="so_ghe")
+      div.form-group
+        label(for="so_nam_su_dung") Số năm sử dụng
+        input.form-control(type="number",id="so_nam_su_dung",name="so_nam_su_dung")
+      div.form-group
+        label(for="ngay_bao_duong_cuoi") Ngày bảo dưỡng cuối
+        input.form-control(type="date",id="ngay_bao_duong_cuoi",name="ngay_bao_duong_cuoi")
+      div.text-right
+        a.btn.btn-default.w-200px.mr-12px(href="/") Quay lại
+        button.btn.btn-primary.w-200px(type="submit") Gửi

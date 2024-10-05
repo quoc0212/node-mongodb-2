@@ -1,0 +1,44 @@
+extends ../node_modules/jade-bootstrap/_bootstrap.pug
+append body
+  link(rel='stylesheet', href='/stylesheets/style.css')
+  .container
+    table.table.table-condensed.table-bordered
+      tbody 
+        tr
+          td(rowspan='4')
+            h1.text-center Nhập thông tin 
+          td(colspan='2')
+            div
+              a.btn.btn-primary.w-full(href="cars") Đăng ký thông tin xe   
+        tr
+          td
+            div
+              a.btn.btn-primary.w-full(href="drivers") Đăng ký thông tin tài xế
+        tr
+          td
+            div 
+              a.btn.btn-primary.w-full(href="routes") Đăng ký thông tin tuyến đường
+        tr
+          td
+            div 
+              a.btn.btn-primary.w-full(href="trips") Đăng ký thông tin chuyến đi
+        tr 
+          td(rowspan='3')
+            h1.text-center Truy vấn thông tin
+          td(colspan='2')
+            form(action="/question-1",method='post')
+              button.btn.btn-primary.w-full(type="submit") Truy vấn câu số 1
+        tr
+          td
+            form(action="/question-2",method='post')
+              div.form-group 
+                label(for='ngay_bat_dau') Ngày bắt đầu
+                input.form-control(type='date',id='ngay_bat_dau',name='ngay_bat_dau')
+              div.form-group 
+                label(for='ngay_ket_thuc') Ngày kết thúc
+                input.form-control(type='date',id='ngay_ket_thuc',name='ngay_ket_thuc')
+              button.btn.btn-primary.w-full(type="submit") Truy vấn câu số 2
+        tr
+          td
+            form(action="/question-3",method='post')
+              button.btn.btn-primary.w-full(type="submit") Truy vấn câu số 3

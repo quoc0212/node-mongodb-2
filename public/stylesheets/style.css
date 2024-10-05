@@ -1,0 +1,72 @@
+html {
+  height: 100%;
+}
+
+body {
+  padding: 50px;
+  height: 100%;
+  background-color: lightgray;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+.container {
+  padding: 20px;
+  border: 1px solid;
+  box-shadow: 2px 2px slategrey;
+  background-color: white;
+}
+
+a {
+  color: #00b7ff;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.w-200px {
+  width: 200px;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.mr-12px {
+  margin-right: 12px;
+}
+
+.btn {
+  font-size: 18px;
+}
+
+label {
+  font-size: 16px;
+}
+
+table {
+  border-width: 3px !important;
+}
+
+table td {
+  border-width: 3px !important;
+}
+
+.result-container table tr:nth-child(even) {
+  background-color: #d1d6db;
+}
+
+table th {
+  border-width: 3px !important;
+  background-color: #337ab7;
+  color: #fff;
+}
