@@ -33,7 +33,7 @@ mixin pagination(adjacents, numPages, display, currentPage, base)
               a(href=base + p)
                 | #{p}
           - p++;
-        li.disabled
+        li
           a(href="#")
             | &hellip;
         li.page
@@ -49,7 +49,7 @@ mixin pagination(adjacents, numPages, display, currentPage, base)
         li.page
           a(href=base + 2)
             | 2
-        li.disabled
+        li
           a(href="#")
             | &hellip;
         - var p = currentPage - adjacents;
@@ -63,7 +63,7 @@ mixin pagination(adjacents, numPages, display, currentPage, base)
               a(href=base + p)
                 | #{p}
           - p++;
-        li.disabled
+        li
           a(href="#")
             | &hellip;
         li.page
@@ -79,7 +79,7 @@ mixin pagination(adjacents, numPages, display, currentPage, base)
         li.page
           a(href=base + 2)
             | 2
-        li.disabled
+        li
           a(href="#")
             | &hellip;
         - var p = numPages - (1 + (adjacents * 3));
@@ -99,7 +99,7 @@ append body
     //if it's already a date object and not a string you don't need this line:
     -var date = new Date(dateString);
     -var d = date.getDate();
-    -var m = date.getMonth();
+    -var m = date.getMonth() + 1;
     -var y = date.getFullYear();
     -return d+'/'+m+'/'+y;
   -}
@@ -136,6 +136,6 @@ append body
             td= car.so_ngay_chua_tru
             td= prettyDate(car.den_ngay_bao_duong)
     div.text-right
-      +pagination(3, 1, 7, 1, '#')
+      +pagination(3, numPage, 7, currentPage, '/question-3/')
     div.text-right
       a.btn.btn-default.w-200px.mr-12px(href="/") Quay lại trang chủ

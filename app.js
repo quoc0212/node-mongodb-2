@@ -15,8 +15,9 @@ var queryRouter = require("./routes/query");
 
 var app = express();
 
-const url = "<your connection string>";
-const dbName = "your DB name";
+const url =
+  "mongodb+srv://admin:Abc123456@long-transportations.a4l6l.mongodb.net/";
+const dbName = "transportation";
 const client = new MongoClient(url, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -161,7 +162,6 @@ app.post("/create-trip", async function (req, res) {
       }
     });
     res.redirect("/trips");
-    console.log("Connected successfully to MongoDB");
   } catch (e) {
     console.error(e);
   } finally {
@@ -177,103 +177,6 @@ app.post("/filter-aggregate", async function (req, res) {
     const collection = db.collection(req.body.table);
     console.log(typeof req.body.query);
     const result = await collection.aggregate(req.body.query).toArray();
-    res.send(result);
-  } catch (e) {
-    console.error(e);
-  } finally {
-    // Close the connection to the MongoDB cluster
-    await client.close();
-  }
-});
-
-app.get("/question-1", async function (req, res) {
-  try {
-    await client.connect();
-    const db = client.db(dbName);
-    const collection = db.collection("trips");
-
-    const result = await collection
-      .aggregate([
-        {
-          $match: {
-            ngay_ket_thuc: { $lte: new Date() },
-          },
-        },
-        {
-          $lookup: {
-            from: "routes",
-            localField: "route_id",
-            foreignField: "tuyen",
-            as: "routeInfo",
-          },
-        },
-        {
-          $addFields: {
-            he_so: {
-              $switch: {
-                branches: [
-                  {
-                    case: { $eq: [{ $first: "$routeInfo.do_phuc_tap" }, 1] },
-                    then: 0.8,
-                  },
-                  {
-                    case: { $eq: [{ $first: "$routeInfo.do_phuc_tap" }, 2] },
-                    then: 1.2,
-                  },
-                  {
-                    case: { $eq: [{ $first: "$routeInfo.do_phuc_tap" }, 3] },
-                    then: 3.5,
-                  },
-                ],
-                default: 1,
-              },
-            },
-          },
-        },
-        {
-          $unwind: "$routeInfo",
-        },
-        {
-          $lookup: {
-            from: "drivers",
-            let: { tripLaiXe: "$ten_lai_xe", tripPhuXe: "$ten_phu_xe" },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $or: [
-                      { $eq: ["$driver_id", "$$tripLaiXe"] },
-                      { $eq: ["$driver_id", "$$tripPhuXe"] },
-                    ],
-                  },
-                },
-              },
-            ],
-            as: "driverDetails",
-          },
-        },
-        {
-          $unwind: "$driverDetails",
-        },
-        {
-          $group: {
-            _id: "$driverDetails.driver_id",
-            totalAmount: {
-              $sum: {
-                $cond: {
-                  if: { $eq: ["$ten_lai_xe", "$driverDetails.driver_id"] },
-                  then: { $multiply: ["$gia_ve", "$so_khach", "$he_so", 2] },
-                  else: { $multiply: ["$gia_ve", "$so_khach", "$he_so"] },
-                },
-              },
-            },
-            driverDetails: { $first: "$driverDetails" },
-          },
-        },
-        { $skip: 0 },
-        { $limit: 10 },
-      ])
-      .toArray();
     res.send(result);
   } catch (e) {
     console.error(e);
@@ -324,6 +227,56 @@ app.post("/question-1", async function (req, res) {
     const db = client.db(dbName);
     const collection = db.collection("trips");
 
+    const total = await collection
+      .aggregate([
+        {
+          $match: {
+            ngay_ket_thuc: { $lte: new Date() },
+          },
+        },
+        {
+          $lookup: {
+            from: "routes",
+            localField: "route_id",
+            foreignField: "tuyen",
+            as: "routeInfo",
+          },
+        },
+        {
+          $unwind: "$routeInfo",
+        },
+        {
+          $lookup: {
+            from: "drivers",
+            let: { tripLaiXe: "$ten_lai_xe", tripPhuXe: "$ten_phu_xe" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $or: [
+                      { $eq: ["$driver_id", "$$tripLaiXe"] },
+                      { $eq: ["$driver_id", "$$tripPhuXe"] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "driverDetails",
+          },
+        },
+        {
+          $unwind: "$driverDetails",
+        },
+        {
+          $group: {
+            _id: "$driverDetails.driver_id",
+          },
+        },
+        {
+          $count: "trip_id",
+        },
+      ])
+      .toArray();
     const result = await collection
       .aggregate([
         {
@@ -402,11 +355,173 @@ app.post("/question-1", async function (req, res) {
             driverDetails: { $first: "$driverDetails" },
           },
         },
+        { $sort: { _id: 1 } },
         { $skip: 0 },
         { $limit: 10 },
       ])
       .toArray();
-    res.render("result_1", { title: "Result", result: result });
+    res.render("result_1", {
+      title: "Result",
+      result: result,
+      total: total[0].trip_id,
+      numPage: Math.ceil(total[0].trip_id / 10),
+    });
+  } catch (e) {
+    console.error(e);
+  } finally {
+    // Close the connection to the MongoDB cluster
+    await client.close();
+  }
+});
+
+app.get("/question-1/:page", async function (req, res) {
+  try {
+    await client.connect();
+    let page = req.params.page;
+
+    const db = client.db(dbName);
+    const collection = db.collection("trips");
+
+    const total = await collection
+      .aggregate([
+        {
+          $match: {
+            ngay_ket_thuc: { $lte: new Date() },
+          },
+        },
+        {
+          $lookup: {
+            from: "routes",
+            localField: "route_id",
+            foreignField: "tuyen",
+            as: "routeInfo",
+          },
+        },
+        {
+          $unwind: "$routeInfo",
+        },
+        {
+          $lookup: {
+            from: "drivers",
+            let: { tripLaiXe: "$ten_lai_xe", tripPhuXe: "$ten_phu_xe" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $or: [
+                      { $eq: ["$driver_id", "$$tripLaiXe"] },
+                      { $eq: ["$driver_id", "$$tripPhuXe"] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "driverDetails",
+          },
+        },
+        {
+          $unwind: "$driverDetails",
+        },
+        {
+          $group: {
+            _id: "$driverDetails.driver_id",
+          },
+        },
+        {
+          $count: "trip_id",
+        },
+      ])
+      .toArray();
+    const result = await collection
+      .aggregate([
+        {
+          $match: {
+            ngay_ket_thuc: { $lte: new Date() },
+          },
+        },
+        {
+          $lookup: {
+            from: "routes",
+            localField: "route_id",
+            foreignField: "tuyen",
+            as: "routeInfo",
+          },
+        },
+        {
+          $addFields: {
+            he_so: {
+              $switch: {
+                branches: [
+                  {
+                    case: { $eq: [{ $first: "$routeInfo.do_phuc_tap" }, 1] },
+                    then: 0.8,
+                  },
+                  {
+                    case: { $eq: [{ $first: "$routeInfo.do_phuc_tap" }, 2] },
+                    then: 1.2,
+                  },
+                  {
+                    case: { $eq: [{ $first: "$routeInfo.do_phuc_tap" }, 3] },
+                    then: 3.5,
+                  },
+                ],
+                default: 1,
+              },
+            },
+          },
+        },
+        {
+          $unwind: "$routeInfo",
+        },
+        {
+          $lookup: {
+            from: "drivers",
+            let: { tripLaiXe: "$ten_lai_xe", tripPhuXe: "$ten_phu_xe" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $or: [
+                      { $eq: ["$driver_id", "$$tripLaiXe"] },
+                      { $eq: ["$driver_id", "$$tripPhuXe"] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "driverDetails",
+          },
+        },
+        {
+          $unwind: "$driverDetails",
+        },
+        {
+          $group: {
+            _id: "$driverDetails.driver_id",
+            totalAmount: {
+              $sum: {
+                $cond: {
+                  if: { $eq: ["$ten_lai_xe", "$driverDetails.driver_id"] },
+                  then: { $multiply: ["$gia_ve", "$so_khach", "$he_so", 2] },
+                  else: { $multiply: ["$gia_ve", "$so_khach", "$he_so"] },
+                },
+              },
+            },
+            driverDetails: { $first: "$driverDetails" },
+          },
+        },
+        { $sort: { _id: 1 } },
+        { $skip: (page - 1) * 10 },
+        { $limit: 10 },
+      ])
+      .toArray();
+    res.render("result_1", {
+      title: "Result",
+      result: result,
+      total: total[0].trip_id,
+      numPage: Math.ceil(total[0].trip_id / 10),
+      currentPage: page,
+    });
   } catch (e) {
     console.error(e);
   } finally {
@@ -421,6 +536,35 @@ app.post("/question-2", async function (req, res) {
     const db = client.db(dbName);
     const collection = db.collection("trips");
 
+    const total = await collection
+      .aggregate([
+        {
+          $match: {
+            ngay_bat_dau: { $gte: new Date(req.body.ngay_bat_dau) },
+            ngay_ket_thuc: { $lte: new Date(req.body.ngay_ket_thuc) },
+          },
+        },
+        {
+          $lookup: {
+            from: "cars",
+            localField: "car_id",
+            foreignField: "car_id",
+            as: "carInfo",
+          },
+        },
+        {
+          $unwind: "$carInfo",
+        },
+        {
+          $group: {
+            _id: "$carInfo.car_id",
+          },
+        },
+        {
+          $count: "trip_id",
+        },
+      ])
+      .toArray();
     const result = await collection
       .aggregate([
         {
@@ -454,11 +598,113 @@ app.post("/question-2", async function (req, res) {
             doanh_thu: { $sum: { $multiply: ["$gia_ve", "$so_khach"] } },
           },
         },
+        { $sort: { _id: 1 } },
         { $skip: 0 },
         { $limit: 10 },
       ])
       .toArray();
-    res.render("result_2", { title: "Result", result: result });
+    res.render("result_2", {
+      title: "Result",
+      result: result,
+      total: total[0].trip_id,
+      numPage: Math.ceil(total[0].trip_id / 10),
+      start: req.body.ngay_bat_dau,
+      end: req.body.ngay_ket_thuc,
+      // currentPage: page,
+    });
+  } catch (e) {
+    console.error(e);
+  } finally {
+    // Close the connection to the MongoDB cluster
+    await client.close();
+  }
+});
+
+app.get("/question-2/:start/:end/:page", async function (req, res) {
+  try {
+    await client.connect();
+    let page = req.params.page;
+    let start = req.params.start;
+    let end = req.params.end;
+    const db = client.db(dbName);
+    const collection = db.collection("trips");
+
+    const total = await collection
+      .aggregate([
+        {
+          $match: {
+            ngay_bat_dau: { $gte: new Date(start) },
+            ngay_ket_thuc: { $lte: new Date(end) },
+          },
+        },
+        {
+          $lookup: {
+            from: "cars",
+            localField: "car_id",
+            foreignField: "car_id",
+            as: "carInfo",
+          },
+        },
+        {
+          $unwind: "$carInfo",
+        },
+        {
+          $group: {
+            _id: "$carInfo.car_id",
+          },
+        },
+        {
+          $count: "trip_id",
+        },
+      ])
+      .toArray();
+    const result = await collection
+      .aggregate([
+        {
+          $match: {
+            ngay_bat_dau: { $gte: new Date(start) },
+            ngay_ket_thuc: { $lte: new Date(end) },
+          },
+        },
+        {
+          $lookup: {
+            from: "cars",
+            localField: "car_id",
+            foreignField: "car_id",
+            as: "carInfo",
+          },
+        },
+        {
+          $unwind: "$carInfo",
+        },
+        {
+          $group: {
+            _id: "$carInfo.car_id",
+            bien_so: { $first: "$carInfo.bien_so" },
+            mau_xe: { $first: "$carInfo.mau_xe" },
+            hang_san_xuat: { $first: "$carInfo.hang_san_xuat" },
+            doi_xe: { $first: "$carInfo.doi_xe" },
+            model: { $first: "$carInfo.model" },
+            so_ghe: { $first: "$carInfo.so_ghe" },
+            so_nam_su_dung: { $first: "$carInfo.so_nam_su_dung" },
+            ngay_bao_duong_cuoi: { $first: "$carInfo.ngay_bao_duong_cuoi" },
+            doanh_thu: { $sum: { $multiply: ["$gia_ve", "$so_khach"] } },
+          },
+        },
+        { $sort: { _id: 1 } },
+        { $skip: (page - 1) * 10 },
+        { $limit: 10 },
+      ])
+      .toArray();
+    res.render("result_2", {
+      title: "Result",
+      result: result,
+      total: total[0].trip_id,
+      numPage: Math.ceil(total[0].trip_id / 10),
+      currentPage: page,
+      start: start,
+      end: end,
+    });
   } catch (e) {
     console.error(e);
   } finally {
@@ -472,7 +718,34 @@ app.post("/question-3", async function (req, res) {
     await client.connect();
     const db = client.db(dbName);
     const collection = db.collection("trips");
-
+    const total = await collection
+      .aggregate([
+        {
+          $lookup: {
+            from: "routes",
+            localField: "route_id",
+            foreignField: "tuyen",
+            as: "routeInfo",
+          },
+        },
+        {
+          $lookup: {
+            from: "cars",
+            localField: "car_id",
+            foreignField: "car_id",
+            as: "carInfo",
+          },
+        },
+        {
+          $group: {
+            _id: "$car_id",
+          },
+        },
+        {
+          $count: "trip_id",
+        },
+      ])
+      .toArray();
     const result = await collection
       .aggregate([
         {
@@ -539,11 +812,137 @@ app.post("/question-3", async function (req, res) {
             },
           },
         },
+        { $sort: { _id: 1 } },
         { $skip: 0 },
         { $limit: 10 },
       ])
       .toArray();
-    res.render("result_3", { title: "Result", result: result });
+    res.render("result_3", {
+      title: "Result",
+      result: result,
+      total: total[0].trip_id,
+      numPage: Math.ceil(total[0].trip_id / 10),
+    });
+  } catch (e) {
+    console.error(e);
+  } finally {
+    // Close the connection to the MongoDB cluster
+    await client.close();
+  }
+});
+
+app.get("/question-3/:page", async function (req, res) {
+  try {
+    await client.connect();
+    let page = req.params.page;
+    const db = client.db(dbName);
+    const collection = db.collection("trips");
+    const total = await collection
+      .aggregate([
+        {
+          $lookup: {
+            from: "routes",
+            localField: "route_id",
+            foreignField: "tuyen",
+            as: "routeInfo",
+          },
+        },
+        {
+          $lookup: {
+            from: "cars",
+            localField: "car_id",
+            foreignField: "car_id",
+            as: "carInfo",
+          },
+        },
+        {
+          $group: {
+            _id: "$car_id",
+          },
+        },
+        {
+          $count: "trip_id",
+        },
+      ])
+      .toArray();
+    const result = await collection
+      .aggregate([
+        {
+          $lookup: {
+            from: "routes",
+            localField: "route_id",
+            foreignField: "tuyen",
+            as: "routeInfo",
+          },
+        },
+        {
+          $lookup: {
+            from: "cars",
+            localField: "car_id",
+            foreignField: "car_id",
+            as: "carInfo",
+          },
+        },
+        {
+          $addFields: {
+            so_ngay_con_lai: {
+              $subtract: [
+                360,
+                {
+                  $dateDiff: {
+                    startDate: { $first: "$carInfo.ngay_bao_duong_cuoi" },
+                    endDate: new Date(),
+                    unit: "day",
+                  },
+                },
+              ],
+            },
+            he_so_tru: {
+              $multiply: [
+                { $first: "$routeInfo.do_dai" },
+                { $first: "$routeInfo.duong_kho" },
+                0.01,
+              ],
+            },
+          },
+        },
+        {
+          $group: {
+            _id: "$car_id",
+            carInfo: { $first: "$carInfo" },
+            so_ngay_can_tru: {
+              $sum: "$he_so_tru",
+            },
+            so_ngay_chua_tru: { $first: "$so_ngay_con_lai" },
+          },
+        },
+        {
+          $addFields: {
+            den_ngay_bao_duong: {
+              $dateAdd: {
+                startDate: { $first: "$carInfo.ngay_bao_duong_cuoi" },
+                unit: "day",
+                amount: {
+                  $floor: {
+                    $subtract: ["$so_ngay_chua_tru", "$so_ngay_can_tru"],
+                  },
+                },
+              },
+            },
+          },
+        },
+        { $sort: { _id: 1 } },
+        { $skip: (page - 1) * 10 },
+        { $limit: 10 },
+      ])
+      .toArray();
+    res.render("result_3", {
+      title: "Result",
+      result: result,
+      total: total[0].trip_id,
+      numPage: Math.ceil(total[0].trip_id / 10),
+      currentPage: page,
+    });
   } catch (e) {
     console.error(e);
   } finally {

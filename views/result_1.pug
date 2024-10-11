@@ -93,7 +93,6 @@ mixin pagination(adjacents, numPages, display, currentPage, base)
                 | #{p}
           - p++;
 
-
 append body
   link(rel='stylesheet', href='/stylesheets/style.css')
   .container.result-container
@@ -110,29 +109,6 @@ append body
             td= driver.driverDetails.ten
             td= driver.totalAmount
     div.text-right
-      +pagination(3, 1, 7, 1, '#')
+      +pagination(3, numPage, 7, currentPage, '/question-1/')
     div.text-right
       a.btn.btn-default.w-200px.mr-12px(href="/") Quay lại trang chủ
-
-  //- nav(aria-label="Page navigation example")
-  //-   ul.pagination
-  //-     li.page-item
-  //-       a.page-link(href="#" aria-label="Previous")
-  //-         i.fi-chevron-left
-  //-     li.page-item.d-sm-none
-  //-       span.page-link.page-link-static 2 / 5
-  //-     li.page-item.d-none.d-sm-block
-  //-       a.page-link(href="#") 1
-  //-     li.page-item.active.d-none.d-sm-block(aria-current="page")
-  //-       span.page-link
-  //-         | 2
-  //-         span.visually-hidden (current)
-  //-     li.page-item.d-none.d-sm-block
-  //-       a.page-link(href="#") 3
-  //-     li.page-item.d-none.d-sm-block
-  //-       a.page-link(href="#") 4
-  //-     li.page-item.d-none.d-sm-block
-  //-       a.page-link(href="#") 5
-  //-     li.page-item
-  //-       a.page-link(href="#" aria-label="Next")
-  //-         i.fi-chevron-right  

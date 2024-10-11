@@ -99,7 +99,7 @@ append body
     //if it's already a date object and not a string you don't need this line:
     -var date = new Date(dateString);
     -var d = date.getDate();
-    -var m = date.getMonth();
+    -var m = date.getMonth() + 1;
     -var y = date.getFullYear();
     -return d+'/'+m+'/'+y;
   -}
@@ -132,6 +132,6 @@ append body
             td= prettyDate(car.ngay_bao_duong_cuoi)
             td= car.doanh_thu
     div.text-right
-      +pagination(3, 1, 7, 1, '#')
+      +pagination(3, numPage, 7, currentPage, '/question-2/' + start + "/" + end + "/")
     div.text-right
       a.btn.btn-default.w-200px.mr-12px(href="/") Quay lại trang chủ
